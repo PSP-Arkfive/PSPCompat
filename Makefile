@@ -30,7 +30,7 @@ PRX_EXPORTS = exports.exp
 USE_KERNEL_LIBC=1
 USE_KERNEL_LIBS=1
 
-LIBDIR = $(ARKROOT)/libs
+LIBDIR = external/libs
 LDFLAGS =  -nostartfiles
 LIBS = -lpspsystemctrl_kernel
 

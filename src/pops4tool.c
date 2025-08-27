@@ -1,36 +1,34 @@
 #include <pspsdk.h>
 #include <pspsysmem_kernel.h>
 #include <pspinit.h>
+#include <pspiofilemgr.h>
+
 #include <ark.h>
-#include <graphics.h>
-#include <macros.h>
+#include <cfwmacros.h>
 #include <module2.h>
-#include <pspdisplay_kernel.h>
 #include <systemctrl.h>
 #include <systemctrl_se.h>
 #include <systemctrl_private.h>
-#include <pspiofilemgr.h>
-#include <functions.h>
 
- typedef struct SceStubLibrary {
-     u32 unk0; //0
-     struct SceStubLibrary *next; //4
-     const char *libName; //8
-     u8 version[2]; //12
-     u16 attribute; //14
-     u8 stubEntryTableLen; //16
-     u8 vStubCount; //17
-     u16 stubCount; //18
-     u32 *nidTable; //20
-     void *stubTable; //24
-     void *vStubTable; //28
-     u16 unk32; //32
-     void *libStubTable; //36
-     u32 status; //40
-     u32 isUserLib; //44
-     char *libName2; //48
-     u32 libNameInHeap; //52
- } SceStubLibrary; //size = 56
+typedef struct SceStubLibrary {
+    u32 unk0; //0
+    struct SceStubLibrary *next; //4
+    const char *libName; //8
+    u8 version[2]; //12
+    u16 attribute; //14
+    u8 stubEntryTableLen; //16
+    u8 vStubCount; //17
+    u16 stubCount; //18
+    u32 *nidTable; //20
+    void *stubTable; //24
+    void *vStubTable; //28
+    u16 unk32; //32
+    void *libStubTable; //36
+    u32 status; //40
+    u32 isUserLib; //44
+    char *libName2; //48
+    u32 libNameInHeap; //52
+} SceStubLibrary; //size = 56
 
 static s32 (*aLinkLibEntries)(SceStubLibrary *stubLib);
 static s32 myLinkLibEntries(SceStubLibrary *stubLib){
@@ -48,7 +46,7 @@ static s32 myLinkLibEntries(SceStubLibrary *stubLib){
 }
 
 void patchPops4Tool(){
-    SceModule2* mod = sceKernelFindModuleByName("sceLoaderCore");
+    SceModule2* mod = (SceModule2*)sceKernelFindModuleByName("sceLoaderCore");
     u32 start_addr = mod->text_addr;
     u32 topaddr = mod->text_addr+mod->text_size;
     

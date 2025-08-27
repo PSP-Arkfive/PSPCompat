@@ -15,19 +15,21 @@
  * along with PRO CFW. If not, see <http://www.gnu.org/licenses/ .
  */
 
+#include <stdio.h>
+#include <string.h>
 #include <pspsdk.h>
 #include <pspsysmem_kernel.h>
 #include <pspkernel.h>
 #include <psputilsforkernel.h>
 #include <pspsysevent.h>
 #include <pspiofilemgr.h>
+
+#include <ark.h>
+#include <cfwmacros.h>
+#include <module2.h>
 #include <systemctrl.h>
 #include <systemctrl_se.h>
-#include <stdio.h>
-#include <string.h>
-#include <ark.h>
-#include "macros.h"
-#include "module2.h"
+
 #include "region_free.h"
 
 extern ARKConfig* ark_config;
@@ -85,10 +87,10 @@ int GetHardwareInfo(u32 *ptachyon, u32 *pbaryon, u32 *ppommel, u32 *pmb, u64 *pf
     u32 mb = UNKNOWN;
     u64 fuseid;
 
-    u32 (*SysregGetTachyonVersion)() = sctrlHENFindFunction("sceLowIO_Driver", "sceSysreg_driver", 0xE2A5D1EE);
-    u64 (*SysregGetFuseId)() = sctrlHENFindFunction("sceLowIO_Driver", "sceSysreg_driver", 0x4F46EEDE);
-    void (*SysconGetBaryonVersion)(u32*) = sctrlHENFindFunction("sceSYSCON_Driver", "sceSyscon_driver", 0x7EC5A957);
-    void (*SysconGetPommelVersion)(u32*) = sctrlHENFindFunction("sceSYSCON_Driver", "sceSyscon_driver", 0xE7E87741);
+    u32 (*SysregGetTachyonVersion)() = (void*)sctrlHENFindFunction("sceLowIO_Driver", "sceSysreg_driver", 0xE2A5D1EE);
+    u64 (*SysregGetFuseId)() = (void*)sctrlHENFindFunction("sceLowIO_Driver", "sceSysreg_driver", 0x4F46EEDE);
+    void (*SysconGetBaryonVersion)(u32*) = (void*)sctrlHENFindFunction("sceSYSCON_Driver", "sceSyscon_driver", 0x7EC5A957);
+    void (*SysconGetPommelVersion)(u32*) = (void*)sctrlHENFindFunction("sceSYSCON_Driver", "sceSyscon_driver", 0xE7E87741);
 
     if (SysregGetTachyonVersion == NULL || SysregGetFuseId == NULL || SysconGetBaryonVersion == NULL || SysconGetPommelVersion == NULL) return -1;
 
@@ -227,16 +229,17 @@ int sctrlArkReplaceUmdKeys(){
 
     // find idsRegeneration exports
     int (*idsRegenerationSetup)(u32, u32, u32, u32, u64, u32, void*) = 
-        sctrlHENFindFunction("pspIdsRegeneration_Driver", "idsRegeneration", 0xBDE13E76);
+        (void*)sctrlHENFindFunction("pspIdsRegeneration_Driver", "idsRegeneration", 0xBDE13E76);
     int (*idsRegenerationCreateCertificatesAndUMDKeys)(void*) = 
-        sctrlHENFindFunction("pspIdsRegeneration_Driver", "idsRegeneration", 0xB79A6C46);
+        (void*)sctrlHENFindFunction("pspIdsRegeneration_Driver", "idsRegeneration", 0xB79A6C46);
 
     if (idsRegenerationCreateCertificatesAndUMDKeys == NULL || idsRegenerationSetup == NULL){
         res = -2;
         goto fake_ids_end;
     }
     
-    u32 tachyon, baryon, pommel, mb, region;
+    u32 tachyon, baryon, pommel, mb;
+    u32 region = regions[se_config->umdregion];
     u64 fuseid;
 
     // get hardware info
@@ -244,7 +247,7 @@ int sctrlArkReplaceUmdKeys(){
     if (res < 0) goto fake_ids_end;
 
     // initialize idsRegeneration with hardware info and new region
-    res = idsRegenerationSetup(tachyon, baryon, pommel, mb, fuseid, regions[se_config->umdregion], NULL);
+    res = idsRegenerationSetup(tachyon, baryon, pommel, mb, fuseid, region, NULL);
     if (res < 0) goto fake_ids_end;
 
     // calculate the new UMD keys
@@ -274,13 +277,13 @@ static int fakeIdStorageLookupForUmd(u16 key, u32 offset, void *buf, u32 len){
 
 void patch_umd_idslookup(SceModule2* mod){
     // this patch allows us to obtain the buffer where umdman stores the UMD keys
-    _idStorageLookup = sctrlHENFindFunction("sceIdStorage_Service", "sceIdStorage_driver", 0x6FE062D1);
+    _idStorageLookup = (void*)sctrlHENFindFunction("sceIdStorage_Service", "sceIdStorage_driver", 0x6FE062D1);
     sctrlHookImportByNID(mod, "sceIdStorage_driver", 0x6FE062D1, &fakeIdStorageLookupForUmd);
 }
 
 void patch_vsh_region_check(SceModule2* mod){
     // patch to remove region check in VSH
-    sctrlHookImportByNID(mod, "sceVshBridge", 0x5C2983C2, 1);
+    sctrlHookImportByNID(mod, "sceVshBridge", 0x5C2983C2, (void*)1);
 }
 
 static u8 get_pscode_from_region(int region)
@@ -320,7 +323,7 @@ static int _sceChkregGetPsCode(u8 *pscode)
     return 0;
 }
 
-void patch_sceChkreg(void)
+void patch_sceChkreg()
 {
     u32 fp;
    

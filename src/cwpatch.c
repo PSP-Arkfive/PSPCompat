@@ -1,9 +1,11 @@
 
+#include <stdio.h>
+#include <string.h>
 #include <pspsdk.h>
 #include <pspinit.h>
 #include <pspdisplay.h>
-#include <stdio.h>
 
+#include <systemctrl.h>
 
 int (* DisplayGetFrameBuf)(void*, void*, void*, int) = NULL;
 

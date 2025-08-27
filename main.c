@@ -1,21 +1,18 @@
 #include <pspsdk.h>
 #include <pspinit.h>
-#include <ark.h>
-#include <graphics.h>
-#include <macros.h>
-#include <module2.h>
-#include <pspdisplay_kernel.h>
 #include <pspsysmem_kernel.h>
+#include <pspiofilemgr.h>
+#include <pspsysevent.h>
+
+#include <ark.h>
+#include <cfwmacros.h>
+#include <module2.h>
 #include <systemctrl.h>
 #include <systemctrl_se.h>
 #include <systemctrl_private.h>
-#include <pspiofilemgr.h>
-#include <pspsysevent.h>
-#include <pspgu.h>
-#include <functions.h>
-#include "libs/graphics/graphics.h"
 
-#include "core/compat/psp/rebootex/payload.h"
+
+#include "rebootex/payload.h"
 
 PSP_MODULE_INFO("ARKCompatLayer", 0x3007, 1, 0);
 
@@ -24,6 +21,8 @@ u32 psp_model = 0;
 
 ARKConfig* ark_config = NULL;
 SEConfig* se_config = NULL;
+
+extern void PSPSyspatchStart();
 
 void processArkConfig(){
     if (ark_config->exec_mode == DEV_UNK){
@@ -50,6 +49,10 @@ int module_start(SceSize args, void * argp)
 
     if (!IS_PSP(ark_config)){
         return 2;
+    }
+
+    if (size_rebootbuffer_psp == 0){
+        return 3;
     }
 
     // set rebootex for PSP

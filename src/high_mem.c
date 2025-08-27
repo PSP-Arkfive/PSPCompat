@@ -15,56 +15,32 @@
  * along with PRO CFW. If not, see <http://www.gnu.org/licenses/ .
  */
 
+#include <stdio.h>
+#include <string.h>
 #include <pspsdk.h>
 #include <pspsysmem_kernel.h>
 #include <pspkernel.h>
 #include <psputilsforkernel.h>
 #include <pspsysevent.h>
 #include <pspiofilemgr.h>
-#include <stdio.h>
-#include <string.h>
+
 #include <ark.h>
 #include <systemctrl.h>
-#include "sysmem.h"
 
-typedef struct  __attribute__((packed))
-{
-    u32 signature;
-    u32 version;
-    u32 fields_table_offs;
-    u32 values_table_offs;
-    int nitems;
-} SFOHeader;
-
-typedef struct __attribute__((packed))
-{
-    u16 field_offs;
-    u8  unk;
-    u8  type; // 0x2 -> string, 0x4 -> number
-    u32 unk2;
-    u32 unk3;
-    u16 val_offs;
-    u16 unk4;
-} SFODir;
-
-typedef struct _MemPart {
-    u32 *meminfo;
-    int offset;
-    int size;
-} MemPart;
+#include "high_mem.h"
 
 extern u32 psp_model;
 static u8 g_p8_size = 4;
 
 static u32 * (*get_memory_partition)(int pid) = NULL;
 
-static u32 findGetPartition(){
+static void* findGetPartition(){
     for (u32 addr = SYSMEM_TEXT; ; addr+=4){
         if (_lw(addr) == 0x2C85000D){
-            return addr-4;
+            return (void*)(addr-4);
         }
     }
-    return 0;
+    return NULL;
 }
 
 static inline u32 *get_partition(int pid)
@@ -100,7 +76,7 @@ int prevent_highmem(){
     return (apitype == 0x144 || apitype == 0x155 || apitype > 0x200);
 }
 
-int prepatch_partitions(void)
+int prepatch_partitions()
 {
     if(prevent_highmem()){
         return -1;

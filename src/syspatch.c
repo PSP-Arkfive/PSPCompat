@@ -1,20 +1,22 @@
+#include <string.h>
 #include <pspsdk.h>
 #include <pspsysmem_kernel.h>
 #include <pspinit.h>
-#include <ark.h>
-#include <graphics.h>
-#include <macros.h>
-#include <module2.h>
 #include <pspdisplay_kernel.h>
+#include <pspiofilemgr.h>
+#include <pspsysevent.h>
+#include <pspumd.h>
+
+#include <ark.h>
+#include <cfwmacros.h>
+#include <module2.h>
 #include <systemctrl.h>
 #include <systemctrl_se.h>
 #include <systemctrl_private.h>
-#include <pspiofilemgr.h>
-#include <pspgu.h>
-#include <pspsysevent.h>
-#include <functions.h>
+
+#include "high_mem.h"
 #include "region_free.h"
-#include "libs/graphics/graphics.h"
+#include "libertas.h"
 
 extern u32 psp_model;
 extern ARKConfig* ark_config;
@@ -23,10 +25,9 @@ extern SEConfig* se_config;
 // Previous Module Start Handler
 STMOD_HANDLER previous = NULL;
 
+extern void usb_charge(u32 milis);
+extern void patchPops4Tool();
 extern int sceKernelSuspendThreadPatched(SceUID thid);
-
-extern int (*_sctrlHENApplyMemory)(u32);
-extern int memoryHandlerPSP(u32 p2);
 
 static int _sceKernelBootFromForUmdMan(void)
 {
@@ -54,19 +55,6 @@ void patch_umdcache(SceModule2* mod)
                 MAKE_DUMMY_FUNCTION_RETURN_1(addr+4);
                 break;
             }
-        }
-    }
-}
-
-void patch_sceWlan_Driver(SceModule2* mod)
-{
-    // disable frequency check
-    u32 text_addr = mod->text_addr;
-    u32 top_addr = text_addr + mod->text_size;
-    for (int addr=text_addr; addr<top_addr; addr+=4){
-        if (_lw(addr) == 0x35070080){
-            _sw(NOP, addr-16);
-            break;
         }
     }
 }
@@ -132,7 +120,7 @@ int (*_sceSysconCtrlLEDOrig)(int, int);
 void disableLEDs(){
     if (se_config->noled){
         int (*_sceSysconCtrlLED)(int, int);
-        _sceSysconCtrlLED = sctrlHENFindFunction("sceSYSCON_Driver", "sceSyscon_driver", 0x18BFBE65);
+        _sceSysconCtrlLED = (void*)sctrlHENFindFunction("sceSYSCON_Driver", "sceSyscon_driver", 0x18BFBE65);
         for (int i=0; i<4; i++) _sceSysconCtrlLED(i, 0);
         static u32 dummy[2] = {JR_RA, LI_V0(0)};
         HIJACK_FUNCTION(_sceSysconCtrlLED, dummy, _sceSysconCtrlLEDOrig);
@@ -158,13 +146,12 @@ void disableUMD(){
             }
         }
         // patch GPIO to disable UMD drive electrically
-        u32 sceGpioPortRead = (void*)sctrlHENFindFunction("sceLowIO_Driver", "sceGpio_driver", 0x4250D44A);
+        u32 sceGpioPortRead = sctrlHENFindFunction("sceLowIO_Driver", "sceGpio_driver", 0x4250D44A);
         REDIRECT_FUNCTION(sceGpioPortRead, sceGpioPortReadPatched);
     }
 }
 
 void processSettings(){
-    int apitype = sceKernelInitApitype();
 
     // USB Charging
     if (se_config->usbcharge){
@@ -190,7 +177,7 @@ void processSettings(){
     disableUMD();
 }
 
-void PSPOnModuleStart(SceModule2 * mod){
+int PSPOnModuleStart(SceModule2 * mod){
     // System fully booted Status
     static int booted = 0;
 
@@ -232,7 +219,7 @@ void PSPOnModuleStart(SceModule2 * mod){
     if (strcmp(mod->modname, "sceImpose_Driver") == 0){
         // Handle Inferno cache setting
         if (psp_model>PSP_1000) { // 8M cache on other models
-            se_config->iso_cache_size = 64 * 1024;
+            se_config->iso_cache_size_kb = 64;
             se_config->iso_cache_num = 128;
             se_config->iso_cache_partition = (se_config->force_high_memory)? 2 : 9;
         }
@@ -320,8 +307,8 @@ flush:
     sctrlFlushCache();
 
     // Forward to previous Handler
-    if(previous) previous(mod);
-
+    if(previous) return previous(mod);
+    return 0;
 }
 
 int (*prev_start)(int modid, SceSize argsize, void * argp, int * modstatus, SceKernelSMOption * opt) = NULL;

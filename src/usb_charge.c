@@ -15,16 +15,17 @@
  * along with PRO CFW. If not, see <http://www.gnu.org/licenses/ .
  */
 
+#include <stdio.h>
+#include <string.h>
 #include <pspsdk.h>
 #include <pspsysmem_kernel.h>
 #include <pspkernel.h>
 #include <psputilsforkernel.h>
 #include <pspsysevent.h>
 #include <pspiofilemgr.h>
-#include <stdio.h>
-#include <string.h>
+
+#include <cfwmacros.h>
 #include <systemctrl.h>
-#include "macros.h"
 
 extern int psp_model;
 

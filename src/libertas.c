@@ -17,11 +17,13 @@
 
 #include <string.h>
 #include <pspiofilemgr.h>
-#include "libertas.h"
+
 #include <ark.h>
-#include "macros.h"
+#include <cfwmacros.h>
 #include <systemctrl.h>
-#include "systemctrl_se.h"
+#include <systemctrl_se.h>
+
+#include "libertas.h"
 
 extern int psp_model;
 extern SEConfig* se_config;
@@ -229,6 +231,19 @@ void patch_Libertas_MAC(SceModule2 * mod)
         		// Overwrite JAL Call
         		text[i] = JAL(ReverseCommandEndianessPatched);
         	}
+        }
+    }
+}
+
+void patch_sceWlan_Driver(SceModule2* mod)
+{
+    // disable frequency check
+    u32 text_addr = mod->text_addr;
+    u32 top_addr = text_addr + mod->text_size;
+    for (int addr=text_addr; addr<top_addr; addr+=4){
+        if (_lw(addr) == 0x35070080){
+            _sw(NOP, addr-16);
+            break;
         }
     }
 }

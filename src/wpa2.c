@@ -1,12 +1,11 @@
+#include <stdio.h>
+#include <string.h>
 #include <pspkernel.h>
 #include <pspidstorage.h>
 #include <pspsysmem_kernel.h>
 
-#include <stdio.h>
-#include <string.h>
-
-#include "systemctrl.h"
-#include "macros.h"
+#include <systemctrl.h>
+#include <cfwmacros.h>
 
 // Credits to @Moment
 
