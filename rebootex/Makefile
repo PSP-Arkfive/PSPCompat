@@ -25,7 +25,7 @@ REBOOT_OBJS = \
 C_OBJS = \
 	patches.o \
 
-LIBS = -L $(ARKROOT)/libs
+LIBS =
 
 ifdef DEBUG
 CFLAGS += -DDEBUG=$(DEBUG)
