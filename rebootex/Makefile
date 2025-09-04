@@ -1,4 +1,5 @@
-PSPSDK=$(shell psp-config --pspsdk-path)
+PSPSDK = $(shell psp-config --pspsdk-path)
+ARKSDK ?= ../external
 REBOOTEXDIR ?= ../../BootLoadEx
 TARGET = reboot.bin.gz
 
@@ -6,7 +7,7 @@ PYTHON=$(shell which python3)
 
 all: $(TARGET)
 
-INCDIR = $(PSPSDK)/include $(REBOOTEXDIR) ../external/include
+INCDIR = $(PSPSDK)/include $(REBOOTEXDIR) $(ARKSDK)/include
 
 CFLAGS = -std=c99 -Wall -Os -G0 -fno-pic $(addprefix -I, $(INCDIR)) -DREBOOTEX
 
