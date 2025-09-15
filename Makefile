@@ -15,7 +15,7 @@ OBJS = \
 	$(C_OBJS) imports.o
 
 PSPSDK = $(shell psp-config --pspsdk-path)
-ARKSDK ?= external
+ARKSDK ?= ../ark-dev-sdk
 
 all: $(TARGET).prx
 
