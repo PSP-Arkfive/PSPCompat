@@ -46,7 +46,7 @@ static s32 myLinkLibEntries(SceStubLibrary *stubLib){
 }
 
 void patchPops4Tool(){
-    SceModule2* mod = (SceModule2*)sceKernelFindModuleByName("sceLoaderCore");
+    SceModule* mod = (SceModule*)sceKernelFindModuleByName("sceLoaderCore");
     u32 start_addr = mod->text_addr;
     u32 topaddr = mod->text_addr+mod->text_size;
     

@@ -65,11 +65,11 @@ typedef struct LIBERTAS_COMMAND
 int read_MAC_config(char * path);
 
 // Hook MAC Getter
-void patch_Libertas_MAC(SceModule2 * mod);
+void patch_Libertas_MAC(SceModule * mod);
 
-void patch_sceWlan_Driver(SceModule2* mod);
+void patch_sceWlan_Driver(SceModule* mod);
 
-void patchSceNetWpa2(SceModule2 *mod);
+void patchSceNetWpa2(SceModule *mod);
 
 #endif
 

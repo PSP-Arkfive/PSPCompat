@@ -275,13 +275,13 @@ static int fakeIdStorageLookupForUmd(u16 key, u32 offset, void *buf, u32 len){
     return _idStorageLookup(key, offset, buf, len); // passthrough
 }
 
-void patch_umd_idslookup(SceModule2* mod){
+void patch_umd_idslookup(SceModule* mod){
     // this patch allows us to obtain the buffer where umdman stores the UMD keys
     _idStorageLookup = (void*)sctrlHENFindFunction("sceIdStorage_Service", "sceIdStorage_driver", 0x6FE062D1);
     sctrlHookImportByNID(mod, "sceIdStorage_driver", 0x6FE062D1, &fakeIdStorageLookupForUmd);
 }
 
-void patch_vsh_region_check(SceModule2* mod){
+void patch_vsh_region_check(SceModule* mod){
     // patch to remove region check in VSH
     sctrlHookImportByNID(mod, "sceVshBridge", 0x5C2983C2, (void*)1);
 }

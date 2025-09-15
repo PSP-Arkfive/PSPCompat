@@ -180,7 +180,7 @@ int read_MAC_config(char * path)
 }
 
 // Hook MAC Getter
-void patch_Libertas_MAC(SceModule2 * mod)
+void patch_Libertas_MAC(SceModule * mod)
 {
     // MAC Spoofer activated
         
@@ -235,7 +235,7 @@ void patch_Libertas_MAC(SceModule2 * mod)
     }
 }
 
-void patch_sceWlan_Driver(SceModule2* mod)
+void patch_sceWlan_Driver(SceModule* mod)
 {
     // disable frequency check
     u32 text_addr = mod->text_addr;

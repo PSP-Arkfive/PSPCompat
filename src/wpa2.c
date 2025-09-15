@@ -23,7 +23,7 @@ static const unsigned char rsn_info[] = {
 };
 
 // We're only interested in the WiFi network module (sceNetApctl_Library)
-void patchSceNetWpa2(SceModule2 *mod)
+void patchSceNetWpa2(SceModule *mod)
 {
     
     // Patch return value (li v0, 4). Then WPA2 will be recognised as WPA!

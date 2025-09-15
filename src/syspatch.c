@@ -34,7 +34,7 @@ static int _sceKernelBootFromForUmdMan(void)
     return 0x20;
 }
 
-void patch_sceUmdMan_driver(SceModule2* mod)
+void patch_sceUmdMan_driver(SceModule* mod)
 {
     int apitype = sceKernelInitApitype();
     if (apitype == 0x152 || apitype == 0x141) {
@@ -43,7 +43,7 @@ void patch_sceUmdMan_driver(SceModule2* mod)
 }
 
 //prevent umd-cache in homebrew, so we can drain the cache partition.
-void patch_umdcache(SceModule2* mod)
+void patch_umdcache(SceModule* mod)
 {
     int apitype = sceKernelInitApitype();
     if (apitype == 0x152 || apitype == 0x141){
@@ -59,7 +59,7 @@ void patch_umdcache(SceModule2* mod)
     }
 }
 
-void patch_scePower_Service(SceModule2* mod)
+void patch_scePower_Service(SceModule* mod)
 {
     // scePowerGetBacklightMaximum always returns 4
     u32 text_addr = mod->text_addr;
@@ -72,7 +72,7 @@ void patch_scePower_Service(SceModule2* mod)
     }
 }
 
-void patch_GameBoot(SceModule2* mod){
+void patch_GameBoot(SceModule* mod){
     u32 p1 = 0;
     u32 p2 = 0;
     int patches = 2;
@@ -91,7 +91,7 @@ void patch_GameBoot(SceModule2* mod){
     _sw(0x24040002, p2 + 4);
 }
 
-void disable_PauseGame(SceModule2* mod)
+void disable_PauseGame(SceModule* mod)
 {
     static int pause_disabled = 0;
     if(psp_model == PSP_GO && !pause_disabled) {
@@ -177,7 +177,7 @@ void processSettings(){
     disableUMD();
 }
 
-int PSPOnModuleStart(SceModule2 * mod){
+int PSPOnModuleStart(SceModule * mod){
     // System fully booted Status
     static int booted = 0;
 
@@ -314,7 +314,7 @@ flush:
 int (*prev_start)(int modid, SceSize argsize, void * argp, int * modstatus, SceKernelSMOption * opt) = NULL;
 int StartModuleHandler(int modid, SceSize argsize, void * argp, int * modstatus, SceKernelSMOption * opt){
 
-    SceModule2* mod = (SceModule2*) sceKernelFindModuleByUID(modid);
+    SceModule* mod = (SceModule*) sceKernelFindModuleByUID(modid);
     if (mod && strcmp(mod->modname, "sceMediaSync") == 0 && se_config->umdregion){
         sctrlArkReplaceUmdKeys();
     }

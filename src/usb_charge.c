@@ -82,7 +82,7 @@ static SceUInt usb_charge_timer_handler(SceUID uid, SceInt64 unk0, SceInt64 unk1
 void usb_charge(u32 milis)
 {
     SceUID vtimer;
-    SceModule2 *mod;
+    SceModule *mod;
 
     if (psp_model == PSP_1000 ) {
         return;
@@ -101,7 +101,7 @@ void usb_charge(u32 milis)
     sceKernelStartVTimer(vtimer);
     sceKernelSetVTimerHandlerWide(vtimer, milis, usb_charge_timer_handler, NULL);
 
-    mod = (SceModule2*)sceKernelFindModuleByName("sceUSB_Driver");
+    mod = (SceModule*)sceKernelFindModuleByName("sceUSB_Driver");
 
     if (mod != NULL) {
         sctrlHookImportByNID(mod, "scePower_driver", 0x72D1B53A, 0);
