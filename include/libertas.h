@@ -19,7 +19,7 @@
 #define LIBERTAS_H_
 
 #include <pspsdk.h>
-#include "module2.h"
+
 
 #define LIBERTAS_CMD_GET_HW_SPEC 0x0003
 #define LIBERTAS_ACTION_GET 0
