@@ -24,7 +24,7 @@ REBOOT_OBJS = \
 	scanner.o
 
 C_OBJS = \
-	patches.o \
+	$(REBOOTEXDIR)/psp_rebootex/patches.o \
 
 LIBS =
 
