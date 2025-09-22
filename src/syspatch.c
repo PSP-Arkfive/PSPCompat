@@ -177,7 +177,7 @@ void processSettings(){
     disableUMD();
 }
 
-int PSPOnModuleStart(SceModule * mod){
+void PSPOnModuleStart(SceModule * mod){
     // System fully booted Status
     static int booted = 0;
 
@@ -307,8 +307,7 @@ flush:
     sctrlFlushCache();
 
     // Forward to previous Handler
-    if(previous) return previous(mod);
-    return 0;
+    if (previous) previous(mod);
 }
 
 int (*prev_start)(int modid, SceSize argsize, void * argp, int * modstatus, SceKernelSMOption * opt) = NULL;
