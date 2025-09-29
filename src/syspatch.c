@@ -163,8 +163,7 @@ void processSettings(){
         strcpy(ark_config->launcher, VBOOT_PBP); // set CFW in launcher mode
     }
     else{
-        if (strcmp(ark_config->launcher, "PROSHELL") != 0)
-            ark_config->launcher[0] = 0; // disable launcher mode
+        ark_config->launcher[0] = 0; // disable launcher mode
     }
 
     // VSH region
