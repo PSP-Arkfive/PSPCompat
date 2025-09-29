@@ -58,4 +58,20 @@ add_custom_command(OUTPUT payload.h
   COMMAND bin2c "$<TARGET_FILE:pspcompat_reboot>.bin.gz" payload.h rebootbuffer_psp
 )
 
+set(BTCNF_FILES pstbtcnf_dt.bin pstbtcnf_tt.bin)
+
+foreach(BTCNF_BIN_FILE IN LISTS BTCNF_FILES)
+  string(REPLACE ".bin" ".txt" BTCNF_TXT_FILE "${BTCNF_BIN_FILE}")
+  add_custom_command(
+    OUTPUT ${BTCNF_BIN_FILE}
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/btcnf/${BTCNF_TXT_FILE}"
+    COMMAND python3 $<TARGET_PROPERTY:tool_btcnf,EXEC> build "${CMAKE_CURRENT_SOURCE_DIR}/btcnf/${BTCNF_TXT_FILE}"
+    COMMAND ${CMAKE_COMMAND} -E rename "${CMAKE_CURRENT_SOURCE_DIR}/btcnf/${BTCNF_BIN_FILE}" "${CMAKE_CURRENT_BINARY_DIR}/${BTCNF_BIN_FILE}"
+  )
+endforeach()
+
+add_custom_target(pspcompat_genbtcnf ALL
+    DEPENDS ${BTCNF_FILES}
+)
+
 add_subdirectory(rebootex)
